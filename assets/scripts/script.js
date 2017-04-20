@@ -104,7 +104,7 @@ function addRings() {
 	var rot = initialRot + 3.14 + (Math.random() * 6.28);
 
 	var rect = new PIXI.Graphics();
-	rect.blendMode = PIXI.BLEND_MODES.MULTIPLY;
+	rect.blendMode = PIXI.BLEND_MODES.OVERLAY;
 	rect.alpha = 0.01;
 	rect.beginFill(colorThemes.meteor[Math.floor(Math.random() * colorThemes.meteor.length)]);
 	rect.drawRect(ringOffset, -radius, radius * 2, radius * 2);
@@ -134,7 +134,7 @@ function splotch() {
 	blend.splotchContainer = splotchContainer;
 
 	// var cMain = new PIXI.Graphics();
-	// cMain.blendMode = PIXI.BLEND_MODES.MULTIPLY;
+	// cMain.blendMode = PIXI.BLEND_MODES.ADD;
 	// cMain.alpha = 0.03;
 	// cMain.beginFill(color);
 	// cMain.drawCircle(0, 0, radius / 3);
@@ -155,24 +155,24 @@ function splotch() {
 
 			var cOuter = new PIXI.Graphics();
 			cOuter.blendMode = PIXI.BLEND_MODES.OVERLAY;
-			cOuter.alpha = 0.01;
+			cOuter.alpha = 0.05;
 			cOuter.beginFill(color);
 			cOuter.drawCircle(0, 0, newRad);
 			cOuter.scale.x = 1;
 			cOuter.scale.y = 1;
 			splotchContainer.addChild(cOuter);
-			TweenMax.to(cOuter.scale, 2, {
+			TweenMax.to(cOuter.scale, 4, {
 				x: 0, 
 				y: 0, 
-				ease: Power2.easeOut, 
+				ease: Power3.easeOut, 
 				onComplete: function(){
 					splotchContainer.removeChildren();
 				}
 			});
-			TweenMax.to(cOuter.position, 2, {
+			TweenMax.to(cOuter.position, 4, {
 				x: newX, 
 				y: newY, 
-				ease: Power2.easeOut,
+				ease: Power3.easeOut,
 				onUpdate: function(tween){
 					tween.target.x += Math.random() * 10;
 					tween.target.y += Math.random() * 10;
@@ -187,15 +187,17 @@ function splotch() {
 	// srt.position.x = xPos;
 	// srt.position.y = yPos;
 	var srtSprite = new PIXI.Sprite(srt);
-	srtSprite.blendMode = PIXI.BLEND_MODES.OVERLAY;
+	// srtSprite.blendMode = PIXI.BLEND_MODES.MULTIPLY;
 	srtSprite.anchor.x = 0.5;
 	srtSprite.anchor.y = 0.5;
 	srtSprite.position.x = xPos;
 	srtSprite.position.y = yPos;
 	srtSprite.scale.x = 0.5;
 	srtSprite.scale.y = 0.5;
-	srtSprite.alpha = 0.1;
-	blend.blendContainer.addChild(srtSprite);
+	// srtSprite.alpha = 0.1;
+	blend.stage.addChild(srtSprite);
+
+	window.currentSplotchSprite = srtSprite;
 
 	// var displacementSprite = PIXI.Sprite.fromImage('assets/images/displacement_map.jpg');
 	// var displacementFilter = new PIXI.filters.DisplacementFilter(displacementSprite);
@@ -207,21 +209,22 @@ function splotch() {
 		ease: Power2.easeOut, 
 		onUpdate: function(){
 			// splotchContainer.setTransform();
-			blend.app.renderer.render(splotchContainer, srt);
+			blend.app.renderer.render(splotchContainer, srt, false);
 		},
 		onComplete: function(){
-			blend.blendContainer.removeChild(srtSprite);
+			blend.stage.removeChild(srtSprite);
+			blend.app.renderer.render(srtSprite, blend.renderTexture, false);
 		}
 	});
-	TweenMax.to(srtSprite, 4, {
-		alpha: 0, 
-		ease: Power2.easeIn
-	});
+	// TweenMax.to(srtSprite, 4, {
+	// 	alpha: 0, 
+	// 	ease: Power2.easeIn
+	// });
 };
 
 function redlineGraphic() {
 	var c1 = new PIXI.Graphics();
-	c1.blendMode = PIXI.BLEND_MODES.OVERLAY;
+	c1.blendMode = PIXI.BLEND_MODES.ADD;
 	c1.alpha = 0.02;
 	c1.beginFill(0xff2828);
 	c1.drawCircle(0, 0, 600);
@@ -249,7 +252,7 @@ function redlineGraphic() {
 	// }});
 
 	var c3 = new PIXI.Graphics();
-	c3.blendMode = PIXI.BLEND_MODES.MULTIPLY;
+	c3.blendMode = PIXI.BLEND_MODES.ADD;
 	c3.alpha = 0.2;
 	c3.beginFill(0xff0280);
 	c3.drawCircle(0, 0, 210);
@@ -262,7 +265,7 @@ function redlineGraphic() {
 		blend.blendContainer.removeChild(c3);
 
 		var r1 = new PIXI.Graphics();
-		r1.blendMode = PIXI.BLEND_MODES.OVERLAY;
+		r1.blendMode = PIXI.BLEND_MODES.ADD;
 		r1.alpha = 0.2;
 		r1.beginFill(0xffff00);
 		r1.drawPolygon([
