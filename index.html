@@ -14,11 +14,19 @@
 <body>
 
 	<!-- <canvas id="pixi-canvas"></canvas> -->
+	<header>
+		<button onclick="addRings()">Rings</button>
+		<button onclick="addCircles()">Circles</button>
+		<button onclick="redlineGraphic()">Redline</button>
+		<button onclick="splotch()">Splotch</button>
+	</header>
 
-	<button onclick="addRings()">Rings</button>
-	<button onclick="addCircles()">Circles</button>
-	<button onclick="redlineGraphic()">Redline</button>
-	<button onclick="splotch()">Splotch</button>
+	
+
+	<script type="text/javascript">
+		(function(){var script=document.createElement('script');script.onload=function(){var stats=new Stats();document.body.appendChild(stats.dom);requestAnimationFrame(function loop(){stats.update();requestAnimationFrame(loop)});};script.src='//rawgit.com/mrdoob/stats.js/master/build/stats.min.js';document.head.appendChild(script);})();
+
+	</script>
 
 	<script type="text/javascript" src="assets/scripts/pixi.js"></script>
 	<script type="text/javascript" src="assets/scripts/TweenMax.min.js"></script>

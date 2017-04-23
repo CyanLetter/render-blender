@@ -40,7 +40,7 @@ var colorThemes = {
 }
 
 function startPixi() {
-	blend.app = new PIXI.Application(960, 540, { antialias: true, forceCanvas: true });
+	blend.app = new PIXI.Application(960, 540, { antialias: true, forceCanvas: false });
 
 	blend.app.view.id = "pixi-canvas";
 
