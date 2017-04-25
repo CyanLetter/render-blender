@@ -268,8 +268,13 @@ function redlineGraphic() {
 	}});
 };
 
-function reveal() {
+function reveal(mode) {
 	console.log("revealing");
+
+	if (typeof mode === "undefined") {
+		mode = "burst";
+	}
+	// mode: burst, spiral, godray
 
 	if (!blend.bgimg) {
 		blend.bgimg = new PIXI.Sprite.fromImage('assets/images/beetle.jpg');
@@ -278,21 +283,83 @@ function reveal() {
 		blend.bgimg.mask = blend.outputSprite;
 	}
 
-	
+	var modeSettings;
+
+		switch (mode) {
+			case "burst":
+				modeSettings = {
+					count: 36,
+					scaleEase: Power2.easeOut,
+					rotation: 0,
+					startX: 480,
+					startY: 270
+				};
+			break;
+			case "spiral":
+				modeSettings = {
+					count: 36,
+					scaleEase: Linear.easeNone,
+					rotation: 3,
+					startX: 480,
+					startY: 270
+				};
+			break;
+			case "godray":
+				modeSettings = {
+					count: 24,
+					scaleEase: Power2.easeOut,
+					rotation: 0,
+					startX: 0,
+					startY: 0
+				};
+			break;
+			default:
+
+			break;
+		}
 
 	// reveal splotch
 
 	var splotchContainer = new PIXI.Container();
-	splotchContainer.position.x = 480;
-	splotchContainer.position.y = 270;
+	splotchContainer.position.x = modeSettings.startX;
+	splotchContainer.position.y = modeSettings.startY;
 	// blend.blendContainer.addChild(splotchContainer);
 
-	for(var i = 0; i < 36; i++) {
+	for(var i = 0; i < modeSettings.count; i++) {
 		var newRad = (10 + (Math.random() * 25));
-		var rot = (i / 36) * 6.28;
-		var magnitude = 100 + (Math.random() * 270);
-		var newX = Math.sin(rot) * magnitude;
-		var newY = Math.cos(rot) * magnitude;
+		
+		var magnitute, newX, newY, startX, startY, scaleTo;
+
+		switch (mode) {
+			case "burst":
+				var rot = (i / modeSettings.count) * 6.28;
+				magnitude = 100 + (Math.random() * 270);
+				newX = Math.sin(rot) * magnitude;
+				newY = Math.cos(rot) * magnitude;
+				startX = 0;
+				startY = 0;
+				scaleTo = 0;
+			break;
+			case "spiral":
+				var rot = (i / modeSettings.count) * 6.28;
+				magnitude = 100 + (Math.random() * 270);
+				newX = Math.sin(rot) * magnitude;
+				newY = Math.cos(rot) * magnitude;
+				startX = 0;
+				startY = 0;
+				scaleTo = 0;
+			break;
+			case "godray":
+				newX = 480 + (Math.random() * 960);
+				newY = 540 * (i / modeSettings.count);
+				startX = 0;
+				startY = newY;
+				scaleTo = 1;
+			break;
+			default:
+
+			break;
+		}
 
 		var cOuter = new PIXI.Graphics();
 		cOuter.alpha = 0.05;
@@ -300,10 +367,12 @@ function reveal() {
 		cOuter.drawCircle(0, 0, newRad);
 		cOuter.scale.x = 1;
 		cOuter.scale.y = 1;
+		cOuter.position.x = startX;
+		cOuter.position.y = startY;
 		splotchContainer.addChild(cOuter);
 		TweenMax.to(cOuter.scale, 4, {
-			x: 0, 
-			y: 0, 
+			x: scaleTo, 
+			y: scaleTo, 
 			ease: Power3.easeOut, 
 			onComplete: function(){
 				splotchContainer.removeChildren();
@@ -345,7 +414,7 @@ function reveal() {
 	TweenMax.to(srtSprite.scale, 4, {
 		x: 3, 
 		y: 3, 
-		ease: Power2.easeOut, 
+		ease: modeSettings.scale, 
 		onUpdate: function(){
 			// splotchContainer.setTransform();
 			blend.app.renderer.render(splotchContainer, srt, false);
@@ -355,7 +424,8 @@ function reveal() {
 		}
 	});
 	TweenMax.to(srtSprite, 4, {
-		alpha: 0
+		alpha: 0,
+		rotation: modeSettings.rotation
 	});
 };
 
