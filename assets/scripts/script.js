@@ -54,6 +54,9 @@ function startPixi() {
 
 	blend.renderTexture = PIXI.RenderTexture.create(960, 540);
 
+	blend.background = new PIXI.Container();
+	blend.stage.addChild(blend.background);
+
 	// create a new sprite that uses the render texture we created above
 	blend.outputSprite = new PIXI.Sprite(blend.renderTexture);
 	blend.stage.addChild(blend.outputSprite);
@@ -64,7 +67,8 @@ function startPixi() {
 	// addCircles();
 	// addRings();
 	// redlineGraphic();
-	splotch();
+	// splotch();
+	// reveal();
 
 	update();
 };
@@ -132,19 +136,6 @@ function splotch() {
 	// blend.blendContainer.addChild(splotchContainer);
 
 	blend.splotchContainer = splotchContainer;
-
-	// var cMain = new PIXI.Graphics();
-	// cMain.blendMode = PIXI.BLEND_MODES.ADD;
-	// cMain.alpha = 0.03;
-	// cMain.beginFill(color);
-	// cMain.drawCircle(0, 0, radius / 3);
-	// cMain.scale.x = 0;
-	// cMain.scale.y = 0;
-	// splotchContainer.addChild(cMain);
-	// TweenMax.to(cMain.scale, 2, {x: 1, y: 1, ease: Power2.easeOut});
-	// TweenMax.to(cMain, 2, {alpha: 0, ease: Power2.easeIn, onComplete: function(){
-	// 	splotchContainer.removeChild(cMain);
-	// }});
 
 	TweenMax.delayedCall(0.2, function(){
 		for(var i = 0; i < 10; i++) {
@@ -216,10 +207,6 @@ function splotch() {
 			blend.app.renderer.render(srtSprite, blend.renderTexture, false);
 		}
 	});
-	// TweenMax.to(srtSprite, 4, {
-	// 	alpha: 0, 
-	// 	ease: Power2.easeIn
-	// });
 };
 
 function redlineGraphic() {
@@ -279,6 +266,97 @@ function redlineGraphic() {
 		blend.blendContainer.addChild(r1);
 		TweenMax.to(r1, 1.6, {rotation: 4, ease: Power2.easeOut});
 	}});
+};
+
+function reveal() {
+	console.log("revealing");
+
+	if (!blend.bgimg) {
+		blend.bgimg = new PIXI.Sprite.fromImage('assets/images/beetle.jpg');
+		blend.background.addChild(blend.bgimg);
+
+		blend.bgimg.mask = blend.outputSprite;
+	}
+
+	
+
+	// reveal splotch
+
+	var splotchContainer = new PIXI.Container();
+	splotchContainer.position.x = 480;
+	splotchContainer.position.y = 270;
+	// blend.blendContainer.addChild(splotchContainer);
+
+	for(var i = 0; i < 36; i++) {
+		var newRad = (10 + (Math.random() * 25));
+		var rot = (i / 36) * 6.28;
+		var magnitude = 100 + (Math.random() * 270);
+		var newX = Math.sin(rot) * magnitude;
+		var newY = Math.cos(rot) * magnitude;
+
+		var cOuter = new PIXI.Graphics();
+		cOuter.alpha = 0.05;
+		cOuter.beginFill(0xffffff);
+		cOuter.drawCircle(0, 0, newRad);
+		cOuter.scale.x = 1;
+		cOuter.scale.y = 1;
+		splotchContainer.addChild(cOuter);
+		TweenMax.to(cOuter.scale, 4, {
+			x: 0, 
+			y: 0, 
+			ease: Power3.easeOut, 
+			onComplete: function(){
+				splotchContainer.removeChildren();
+			}
+		});
+		TweenMax.to(cOuter.position, 4, {
+			x: newX, 
+			y: newY, 
+			ease: Power3.easeOut,
+			onUpdate: function(tween){
+				tween.target.x += Math.random() * 20;
+				tween.target.y += Math.random() * 20;
+			},
+			onUpdateParams:["{self}"]
+		});
+		// TweenMax.to(cOuter, 2, {alpha: 0, ease: Power2.easeIn});
+	}
+
+	var srt = PIXI.RenderTexture.create(960, 540);
+	// srt.position.x = xPos;
+	// srt.position.y = yPos;
+	var srtSprite = new PIXI.Sprite(srt);
+	// srtSprite.blendMode = PIXI.BLEND_MODES.MULTIPLY;
+	srtSprite.anchor.x = 0.5;
+	srtSprite.anchor.y = 0.5;
+	srtSprite.position.x = 480;
+	srtSprite.position.y = 270;
+	srtSprite.scale.x = 0.5;
+	srtSprite.scale.y = 0.5;
+	// srtSprite.alpha = 0.1;
+	blend.blendContainer.addChild(srtSprite);
+
+	window.currentSplotchSprite = srtSprite;
+
+	// var displacementSprite = PIXI.Sprite.fromImage('assets/images/displacement_map.jpg');
+	// var displacementFilter = new PIXI.filters.DisplacementFilter(displacementSprite);
+	// srtSprite.filters = [displacementFilter];
+
+	TweenMax.to(srtSprite.scale, 4, {
+		x: 3, 
+		y: 3, 
+		ease: Power2.easeOut, 
+		onUpdate: function(){
+			// splotchContainer.setTransform();
+			blend.app.renderer.render(splotchContainer, srt, false);
+		},
+		onComplete: function(){
+			blend.blendContainer.removeChild(srtSprite);
+		}
+	});
+	TweenMax.to(srtSprite, 4, {
+		alpha: 0
+	});
 };
 
  
