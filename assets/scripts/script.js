@@ -73,8 +73,11 @@ function startPixi() {
 	update();
 };
 
-function makeBackground() {
-
+function clearRenderTexture() {
+	blend.stage.removeChild(blend.outputSprite);
+	blend.renderTexture = PIXI.RenderTexture.create(960, 540);
+	blend.outputSprite = new PIXI.Sprite(blend.renderTexture);
+	blend.stage.addChild(blend.outputSprite);
 };
 
 function addCircles() {
@@ -216,21 +219,18 @@ function reveal(mode) {
 		mode = "burst";
 	}
 	// mode: burst, spiral, godray
-	blend.stage.removeChild(blend.outputSprite);
-	blend.renderTexture = PIXI.RenderTexture.create(960, 540);
-	blend.outputSprite = new PIXI.Sprite(blend.renderTexture);
-	blend.stage.addChild(blend.outputSprite);
 
-	if (!blend.bgimg) {
-		blend.bgimg = new PIXI.Sprite.fromImage('assets/images/beetle.jpg');
-		blend.bgimg.anchor.x = 0.5;
-		blend.bgimg.anchor.y = 0.5;
-		blend.bgimg.position.x = 480;
-		blend.bgimg.position.y = 270;
-		blend.background.addChild(blend.bgimg);
-
-		
+	clearRenderTexture();
+	if (blend.bgimg) {
+		blend.background.removeChild(blend.bgimg);
 	}
+	blend.bgimg = new PIXI.Sprite.fromImage('assets/images/beetle.jpg');
+
+	blend.bgimg.anchor.x = 0.5;
+	blend.bgimg.anchor.y = 0.5;
+	blend.bgimg.position.x = 480;
+	blend.bgimg.position.y = 270;
+	blend.background.addChild(blend.bgimg);
 	blend.bgimg.mask = blend.outputSprite;
 
 	var modeSettings;
@@ -350,8 +350,6 @@ function reveal(mode) {
 	srtSprite.scale.y = 0.5;
 	blend.blendContainer.addChild(srtSprite);
 
-	window.currentSplotchSprite = srtSprite;
-
 	TweenMax.to(srtSprite.scale, 4, {
 		x: 3, 
 		y: 3, 
@@ -377,6 +375,61 @@ function reveal(mode) {
 		y: 1.2
 	});
 };
+
+function pixelRain() {
+	clearRenderTexture();
+
+	if (blend.bgimg) {
+		blend.background.removeChild(blend.bgimg);
+	}
+	blend.bgimg = new PIXI.Sprite.fromImage('assets/images/drifter.jpg');
+	blend.bgimg.anchor.x = 0.5;
+	blend.bgimg.anchor.y = 0.5;
+	blend.bgimg.position.x = 480;
+	blend.bgimg.position.y = 270;
+	blend.background.addChild(blend.bgimg);
+	blend.bgimg.mask = blend.outputSprite;
+
+	var rainContainer = new PIXI.Container();
+	var pixelSize = 5;
+
+	for(var i = 0; i < 960 / pixelSize; i++) {
+
+		var newY = 360 + (Math.random() * 180);
+
+		var drop = new PIXI.Graphics();
+		drop.alpha = 0.05;
+		drop.beginFill(0xffffff);
+		drop.drawRect(0, 0, pixelSize, pixelSize);
+		drop.position.x = i * pixelSize;
+		rainContainer.addChild(drop);
+		TweenMax.to(drop.position, 6, {
+			y: newY, 
+			ease: Linear.easeNone,
+			onComplete: function(){
+				rainContainer.removeChildren();
+			}
+		});
+	}
+
+	var srt = PIXI.RenderTexture.create(960, 540);
+	var srtSprite = new PIXI.Sprite(srt);
+	srtSprite.anchor.x = 0.5;
+	srtSprite.anchor.y = 0.5;
+	srtSprite.position.x = 480;
+	srtSprite.position.y = 270;
+	blend.blendContainer.addChild(srtSprite);
+
+	TweenMax.to(srtSprite.position, 6, {
+		y: 270, 
+		onUpdate: function(){
+			blend.app.renderer.render(rainContainer, srt, false);
+		},
+		onComplete: function(){
+			blend.blendContainer.removeChild(srtSprite);
+		}
+	});
+}
 
  
 function update() {
